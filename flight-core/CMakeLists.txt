@@ -28,3 +28,4 @@ target_link_libraries(flight-core PRIVATE
     Threads::Threads
     ${HIREDIS_LIBRARY}
 )
+

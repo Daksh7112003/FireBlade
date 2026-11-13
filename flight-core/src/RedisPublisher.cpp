@@ -35,3 +35,4 @@ void RedisPublisher::publishTelemetry(const ParsedTelemetry& telem) {
 }
 
 } // namespace fireblade
+

@@ -37,6 +37,17 @@ bool UdpConnection::initialize() {
         return false;
     }
 
+    // Enable SO_REUSEADDR to allow seamless port sharing and fast daemon restart
+    int opt = 1;
+#if defined(_WIN32)
+    setsockopt(socketFd_, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));
+#else
+    setsockopt(socketFd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+#if defined(SO_REUSEPORT)
+    setsockopt(socketFd_, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+#endif
+#endif
+
     sockaddr_in bindAddr{};
     bindAddr.sin_family = AF_INET;
     bindAddr.sin_addr.s_addr = INADDR_ANY;
@@ -47,7 +58,7 @@ bool UdpConnection::initialize() {
         return false;
     }
 
-    std::cout << "[UdpConnection] Bound successfully to UDP port " << listenPort_ << std::endl;
+    std::cout << "[UdpConnection] Bound successfully to UDP port " << listenPort_ << " (ArduPilot/PX4 ready)" << std::endl;
     return true;
 }
 
