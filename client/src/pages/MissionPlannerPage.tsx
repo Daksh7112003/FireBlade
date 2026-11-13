@@ -2,15 +2,10 @@ import React, { useState } from 'react';
 import { TacticalMap } from '../components/map/TacticalMap';
 import { Upload, CheckCircle2, AlertCircle, Plus, Trash2, Navigation } from 'lucide-react';
 import { uploadMissionToUav } from '../api/missions.api';
+import { useMissionStore } from '../stores/missionStore';
 
 export const MissionPlannerPage: React.FC = () => {
-  const [waypoints, setWaypoints] = useState([
-    { seq: 0, lat: 37.7749, lon: -122.4194, alt: 30, cmd: 'TAKEOFF' },
-    { seq: 1, lat: 37.7760, lon: -122.4180, alt: 50, cmd: 'WAYPOINT' },
-    { seq: 2, lat: 37.7775, lon: -122.4200, alt: 50, cmd: 'WAYPOINT' },
-    { seq: 3, lat: 37.7749, lon: -122.4194, alt: 30, cmd: 'RTL' },
-  ]);
-
+  const { waypoints, addWaypoint, removeWaypoint } = useMissionStore();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -22,7 +17,7 @@ export const MissionPlannerPage: React.FC = () => {
       if (res.success) {
         setUploadStatus({
           type: 'success',
-          message: `Mission accepted! ${res.count} waypoints uploaded to UAV via MAVLink.`,
+          message: `Mission accepted! ${res.count} waypoints synced with ArduPilot.`,
         });
       } else {
         throw new Error(res.error || 'Autopilot rejected mission');
@@ -37,30 +32,21 @@ export const MissionPlannerPage: React.FC = () => {
     }
   };
 
-  const addWaypoint = () => {
+  const handleAddWaypoint = () => {
     const last = waypoints[waypoints.length - 1];
     const newSeq = waypoints.length;
-    setWaypoints([
-      ...waypoints,
-      {
-        seq: newSeq,
-        lat: last ? last.lat + 0.001 : 37.775,
-        lon: last ? last.lon + 0.001 : -122.419,
-        alt: 50,
-        cmd: 'WAYPOINT',
-      },
-    ]);
-  };
-
-  const removeWaypoint = (index: number) => {
-    if (waypoints.length <= 1) return;
-    const updated = waypoints.filter((_, i) => i !== index).map((wp, idx) => ({ ...wp, seq: idx }));
-    setWaypoints(updated);
+    addWaypoint({
+      seq: newSeq,
+      lat: last ? last.lat + 0.0015 : 37.775,
+      lon: last ? last.lon + 0.0015 : -122.419,
+      alt: 50,
+      cmd: 'WAYPOINT',
+    });
   };
 
   return (
     <div className="h-full w-full flex bg-tactical-dark">
-      {/* Tactical Map */}
+      {/* Tactical Map with Waypoint Path */}
       <div className="flex-1 relative">
         <TacticalMap selectedVehicleId="1" />
       </div>
@@ -113,7 +99,7 @@ export const MissionPlannerPage: React.FC = () => {
             >
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <span className="text-cyan-400 font-bold">WP #{wp.seq}</span>
+                  <span className="text-yellow-400 font-bold">WP #{wp.seq}</span>
                   <span className="px-1.5 py-0.2 rounded text-[10px] bg-slate-800 text-slate-300">
                     {wp.cmd}
                   </span>
@@ -139,7 +125,7 @@ export const MissionPlannerPage: React.FC = () => {
         {/* Add Waypoint Button */}
         <div className="pt-3 border-t border-slate-800">
           <button
-            onClick={addWaypoint}
+            onClick={handleAddWaypoint}
             className="w-full flex items-center justify-center space-x-1.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-semibold transition"
           >
             <Plus className="w-3.5 h-3.5" />
