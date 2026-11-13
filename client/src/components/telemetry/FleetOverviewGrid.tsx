@@ -7,9 +7,11 @@ export const FleetOverviewGrid: React.FC = () => {
   const { selectedVehicleId, setSelectedVehicle } = useControlStore();
   const vehicles = useTelemetryStore((s) => s.vehicles);
 
-  const vehicleList = Object.keys(vehicles).length > 0 ? Object.values(vehicles) : [
-    { sysId: 1, flightMode: 'LOITER', altitudeAgl: 35.4, batteryPct: 88, armed: true },
-  ];
+  const filteredVehicles = Object.values(vehicles).filter((v) => v.sysId !== 255 && v.sysId !== 0);
+  const vehicleList =
+    filteredVehicles.length > 0
+      ? filteredVehicles
+      : [{ sysId: 1, flightMode: 'STANDBY', altitudeAgl: 0, batteryPct: 100, armed: false }];
 
   return (
     <div className="flex flex-col space-y-2 p-2">

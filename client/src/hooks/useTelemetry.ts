@@ -13,7 +13,7 @@ export const useTelemetry = (activeVehicleId: string | null) => {
       es.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data && data.sysId) {
+          if (data && data.sysId && data.sysId !== 255 && data.sysId !== 0) {
             updateTelemetry(data.sysId.toString(), data);
           }
         } catch {

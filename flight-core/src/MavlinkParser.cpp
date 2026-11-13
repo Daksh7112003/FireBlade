@@ -29,6 +29,12 @@ void MavlinkParser::parseBuffer(const uint8_t* buffer, size_t length) {
             uint32_t msgId = buffer[i + 7] | (buffer[i + 8] << 8) | (buffer[i + 9] << 16);
             const uint8_t* payload = buffer + i + 10;
 
+            // Filter out GCS (SysID 255) and invalid broadcast (SysID 0)
+            if (sysId == 255 || sysId == 0) {
+                i += totalLen - 1;
+                continue;
+            }
+
             ParsedTelemetry telem{};
             telem.sysId = sysId;
             telem.compId = compId;
@@ -90,6 +96,12 @@ void MavlinkParser::parseBuffer(const uint8_t* buffer, size_t length) {
             uint8_t sysId = buffer[i + 3];
             uint8_t compId = buffer[i + 4];
             uint8_t msgId = buffer[i + 5];
+
+            // Filter out GCS (SysID 255) and invalid broadcast (SysID 0)
+            if (sysId == 255 || sysId == 0) {
+                i += totalLen - 1;
+                continue;
+            }
 
             ParsedTelemetry telem{};
             telem.sysId = sysId;

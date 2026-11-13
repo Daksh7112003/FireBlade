@@ -189,6 +189,12 @@ function parseMavlink(buf, rinfo) {
       const msgId = buf[i + 7] | (buf[i + 8] << 8) | (buf[i + 9] << 16);
       const payloadStart = i + 10;
 
+      // Filter out GCS (SysID 255) and invalid broadcast (SysID 0)
+      if (sysId === 255 || sysId === 0) {
+        i += 10 + payloadLen + 2;
+        continue;
+      }
+
       if (payloadStart + payloadLen <= len) {
         const payload = buf.subarray(payloadStart, payloadStart + payloadLen);
         decodeMessage(sysId, msgId, payload);
