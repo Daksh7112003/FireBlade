@@ -1,0 +1,14 @@
+{
+  "name": "@fireblade/flight-core",
+  "version": "1.0.0",
+  "description": "High-throughput C++ MAVLink v2 communications daemon for Fireblade GCS",
+  "main": "build/flight-core",
+  "scripts": {
+    "build": "mkdir -p build && cd build && cmake .. && cmake --build .",
+    "start": "./build/flight-core",
+    "clean": "rm -rf build"
+  },
+  "keywords": ["mavlink", "uav", "gcs", "px4", "ardupilot"],
+  "author": "Fireblade Systems",
+  "license": "Apache-2.0"
+}
