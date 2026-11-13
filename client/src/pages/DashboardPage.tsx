@@ -1,5 +1,6 @@
 import React from 'react';
 import { TacticalMap } from '../components/map/TacticalMap';
+import { CesiumGlobe } from '../components/map/CesiumGlobe';
 import { PfdOverlay } from '../components/hud/PfdOverlay';
 import { WebRtcPlayer } from '../components/video/WebRtcPlayer';
 import { FleetOverviewGrid } from '../components/telemetry/FleetOverviewGrid';
@@ -9,11 +10,11 @@ import { StatusMessageList } from '../components/telemetry/StatusMessageList';
 import { useControlStore } from '../stores/controlStore';
 import { useUiStore } from '../stores/uiStore';
 import { useTelemetry } from '../hooks/useTelemetry';
-import { Map, Video, Eye, EyeOff } from 'lucide-react';
+import { Map, Video, Eye, EyeOff, Globe } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
   const { selectedVehicleId } = useControlStore();
-  const { activeTab, setActiveTab, showPfd, togglePfd } = useUiStore();
+  const { activeTab, setActiveTab, mapEngine, setMapEngine, showPfd, togglePfd } = useUiStore();
 
   useTelemetry(selectedVehicleId);
 
@@ -22,6 +23,7 @@ export const DashboardPage: React.FC = () => {
       {/* Top Controls Bar */}
       <div className="h-12 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between z-10">
         <div className="flex items-center space-x-3">
+          {/* Main View Switcher */}
           <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded border border-slate-800">
             <button
               onClick={() => setActiveTab('map')}
@@ -43,6 +45,29 @@ export const DashboardPage: React.FC = () => {
             </button>
           </div>
 
+          {/* 3D Map Engine Selector (Satellite vs Cesium Globe) */}
+          {activeTab === 'map' && (
+            <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded border border-slate-800">
+              <button
+                onClick={() => setMapEngine('tactical')}
+                className={`px-2.5 py-1 rounded text-[11px] font-mono transition ${
+                  mapEngine === 'tactical' ? 'bg-slate-800 text-cyan-300 font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                3D SATELLITE
+              </button>
+              <button
+                onClick={() => setMapEngine('cesium')}
+                className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[11px] font-mono transition ${
+                  mapEngine === 'cesium' ? 'bg-slate-800 text-cyan-300 font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Globe className="w-3 h-3 text-cyan-400" />
+                <span>CESIUM GLOBE</span>
+              </button>
+            </div>
+          )}
+
           <button
             onClick={togglePfd}
             className="flex items-center space-x-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-medium transition"
@@ -63,12 +88,16 @@ export const DashboardPage: React.FC = () => {
         {/* Left Primary Display (Map or Video) */}
         <div className="flex-1 relative">
           {activeTab === 'map' ? (
-            <TacticalMap selectedVehicleId={selectedVehicleId || '1'} />
+            mapEngine === 'cesium' ? (
+              <CesiumGlobe selectedVehicleId={selectedVehicleId || '1'} />
+            ) : (
+              <TacticalMap selectedVehicleId={selectedVehicleId || '1'} />
+            )
           ) : (
             <WebRtcPlayer streamPath={`uav_${selectedVehicleId || '1'}_cam_1`} />
           )}
 
-          {/* Floating PFD HUD Glass Cockpit - docked neatly at bottom-left */}
+          {/* Floating PFD HUD Glass Cockpit */}
           {showPfd && selectedVehicleId && (
             <div className="absolute bottom-6 left-6 z-20 transition-all duration-200">
               <PfdOverlay vehicleId={selectedVehicleId} />
