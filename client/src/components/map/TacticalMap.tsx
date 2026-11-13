@@ -44,6 +44,12 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = fal
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    const telem = useTelemetryStore.getState().vehicles[selectedVehicleId];
+    const initialCenter: [number, number] = [
+      telem?.longitude || -122.4194,
+      telem?.latitude || 37.7749,
+    ];
+
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: {
@@ -53,6 +59,13 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = fal
             type: 'raster',
             tiles: [tileSources[activeLayer].url],
             tileSize: 256,
+          },
+          'terrain-source': {
+            type: 'raster-dem',
+            tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding: 'terrarium',
+            tileSize: 256,
+            maxzoom: 15,
           },
         },
         layers: [
@@ -65,18 +78,28 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = fal
           },
         ],
       },
-      center: [-122.4194, 37.7749],
+      center: initialCenter,
       zoom: 15,
       pitch: is3dPitch ? 55 : 0,
       bearing: is3dPitch ? -20 : 0,
       maxPitch: 80,
     });
 
+    // Force canvas resize to ensure edge-to-edge rendering
+    setTimeout(() => {
+      map.current?.resize();
+      if (is3dPitch && map.current) {
+        try {
+          map.current.setTerrain({ source: 'terrain-source', exaggeration: 1.5 });
+        } catch {}
+      }
+    }, 150);
+
     if (editable) {
       map.current.getCanvas().style.cursor = 'crosshair';
     }
 
-    // Create high-visibility tactical UAV marker
+    // High-visibility tactical UAV marker
     const el = document.createElement('div');
     el.className = 'relative flex flex-col items-center cursor-pointer select-none';
     el.innerHTML = `
@@ -110,7 +133,7 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = fal
     droneElement.current = el;
 
     droneMarker.current = new maplibregl.Marker({ element: el })
-      .setLngLat([-122.4194, 37.7749])
+      .setLngLat(initialCenter)
       .addTo(map.current);
 
     map.current.on('load', () => {
@@ -165,7 +188,13 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = fal
       });
     });
 
+    const handleWindowResize = () => {
+      map.current?.resize();
+    };
+    window.addEventListener('resize', handleWindowResize);
+
     return () => {
+      window.removeEventListener('resize', handleWindowResize);
       map.current?.remove();
     };
   }, [selectedVehicleId, editable]);
@@ -176,72 +205,90 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = fal
     setShowLayerMenu(false);
     if (!map.current) return;
 
-    const source = map.current.getSource('base-tiles') as any;
-    if (source && source.setTiles) {
-      source.setTiles([tileSources[type].url]);
-    } else {
-      map.current.setStyle({
-        version: 8,
-        sources: {
-          'base-tiles': {
-            type: 'raster',
-            tiles: [tileSources[type].url],
-            tileSize: 256,
-          },
-          'mission-path': {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: waypoints.map((wp) => [wp.lon, wp.lat]),
-              },
+    map.current.setStyle({
+      version: 8,
+      sources: {
+        'base-tiles': {
+          type: 'raster',
+          tiles: [tileSources[type].url],
+          tileSize: 256,
+        },
+        'terrain-source': {
+          type: 'raster-dem',
+          tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+          encoding: 'terrarium',
+          tileSize: 256,
+          maxzoom: 15,
+        },
+        'mission-path': {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: waypoints.map((wp) => [wp.lon, wp.lat]),
             },
           },
         },
-        layers: [
-          {
-            id: 'base-layer',
-            type: 'raster',
-            source: 'base-tiles',
-            minzoom: 0,
-            maxzoom: tileSources[type].maxzoom,
+      },
+      layers: [
+        {
+          id: 'base-layer',
+          type: 'raster',
+          source: 'base-tiles',
+          minzoom: 0,
+          maxzoom: tileSources[type].maxzoom,
+        },
+        {
+          id: 'mission-path-glow',
+          type: 'line',
+          source: 'mission-path',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#06b6d4',
+            'line-width': 7,
+            'line-opacity': 0.4,
           },
-          {
-            id: 'mission-path-glow',
-            type: 'line',
-            source: 'mission-path',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-              'line-color': '#06b6d4',
-              'line-width': 7,
-              'line-opacity': 0.4,
-            },
+        },
+        {
+          id: 'mission-path-line',
+          type: 'line',
+          source: 'mission-path',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#facc15',
+            'line-width': 2.5,
+            'line-dasharray': [3, 2],
           },
-          {
-            id: 'mission-path-line',
-            type: 'line',
-            source: 'mission-path',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-              'line-color': '#facc15',
-              'line-width': 2.5,
-              'line-dasharray': [3, 2],
-            },
-          },
-        ],
-      });
+        },
+      ],
+    });
+
+    if (is3dPitch) {
+      setTimeout(() => {
+        try {
+          map.current?.setTerrain({ source: 'terrain-source', exaggeration: 1.5 });
+        } catch {}
+      }, 200);
     }
   };
 
-  // Toggle 3D Angled Pitch (55 deg) vs 2D Top-Down (0 deg)
+  // Toggle 3D Pitch
   const toggle3dPitch = () => {
     if (!map.current) return;
-    const newPitch = is3dPitch ? 0 : 55;
-    const newBearing = is3dPitch ? 0 : -20;
+    const nextState = !is3dPitch;
+    const newPitch = nextState ? 55 : 0;
+    const newBearing = nextState ? -20 : 0;
     map.current.easeTo({ pitch: newPitch, bearing: newBearing, duration: 800 });
-    setIs3dPitch(!is3dPitch);
+    try {
+      if (nextState) {
+        map.current.setTerrain({ source: 'terrain-source', exaggeration: 1.5 });
+      } else {
+        map.current.setTerrain(null);
+      }
+    } catch {}
+    setIs3dPitch(nextState);
   };
 
   // Update Mission Path & Draggable Pins
