@@ -20,3 +20,4 @@ sudo ufw allow 8555/udp comment 'WebRTC Media SRTP'
 sudo ufw allow 14550/udp comment 'MAVLink Telemetry & Flight Control'
 
 echo "Host configuration applied."
+

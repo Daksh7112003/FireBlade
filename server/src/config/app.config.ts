@@ -4,3 +4,4 @@ export const appConfig = () => ({
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   nodeEnv: process.env.NODE_ENV || 'development',
 });
+

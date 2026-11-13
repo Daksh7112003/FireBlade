@@ -53,3 +53,4 @@ cd FireBlade
 docker compose -f deploy/docker-compose.yml up -d
 ```
 Then navigate to `http://localhost` or `http://<server-ip>` in your browser.
+

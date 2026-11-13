@@ -95,3 +95,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+

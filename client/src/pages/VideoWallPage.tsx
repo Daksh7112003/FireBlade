@@ -16,3 +16,4 @@ export const VideoWallPage: React.FC = () => {
     </div>
   );
 };
+

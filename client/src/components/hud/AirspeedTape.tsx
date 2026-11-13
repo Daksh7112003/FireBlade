@@ -14,3 +14,4 @@ export const AirspeedTape: React.FC<Props> = ({ groundSpeed }) => {
     </div>
   );
 };
+

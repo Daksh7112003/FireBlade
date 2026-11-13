@@ -18,3 +18,4 @@ export class VideoService {
     return this.videoRepository.find({ where: { vehicleId, isActive: true } });
   }
 }
+

@@ -11,3 +11,4 @@ import { Vehicle } from '../../database/entities/Vehicle.entity';
   exports: [VehiclesService],
 })
 export class VehiclesModule {}
+

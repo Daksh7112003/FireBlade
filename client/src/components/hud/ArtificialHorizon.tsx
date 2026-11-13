@@ -83,3 +83,4 @@ export const ArtificialHorizon: React.FC<Props> = ({ vehicleId }) => {
     />
   );
 };
+

@@ -42,3 +42,4 @@ export class MissionItem {
   @Column({ default: true })
   autocontinue: boolean;
 }
+

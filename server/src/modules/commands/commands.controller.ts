@@ -43,3 +43,4 @@ export class CommandsController {
     return this.commandsService.executeCommand(vehicleId, req.user.id, 'MAV_CMD_NAV_RTL', {});
   }
 }
+

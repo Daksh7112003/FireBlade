@@ -26,3 +26,4 @@ export class ControlLease {
   @Column({ length: 128, nullable: true })
   revocationReason: string;
 }
+

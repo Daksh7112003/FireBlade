@@ -17,3 +17,4 @@ export interface VehicleTelemetry {
   gpsFix?: string;
   satellites?: number;
 }
+

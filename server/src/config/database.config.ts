@@ -7,3 +7,4 @@ export const databaseConfig = (): TypeOrmModuleOptions => ({
   synchronize: process.env.NODE_ENV !== 'production', // Use migrations in production
   logging: process.env.NODE_ENV === 'development',
 });
+

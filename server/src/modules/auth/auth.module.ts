@@ -22,3 +22,4 @@ import { appConfig } from '../../config/app.config';
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
+

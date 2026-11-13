@@ -7,3 +7,4 @@ import { TelemetryService } from './telemetry.service';
   exports: [TelemetryGateway, TelemetryService],
 })
 export class TelemetryModule {}
+

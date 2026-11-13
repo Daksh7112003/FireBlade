@@ -32,3 +32,4 @@ export class VideoSource {
   @CreateDateColumn()
   createdAt: Date;
 }
+

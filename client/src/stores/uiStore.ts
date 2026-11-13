@@ -13,3 +13,4 @@ export const useUiStore = create<UiState>((set) => ({
   setActiveTab: (activeTab) => set({ activeTab }),
   togglePfd: () => set((state) => ({ showPfd: !state.showPfd })),
 }));
+

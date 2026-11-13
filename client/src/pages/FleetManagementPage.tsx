@@ -35,3 +35,4 @@ export const FleetManagementPage: React.FC = () => {
     </div>
   );
 };
+

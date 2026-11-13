@@ -50,3 +50,4 @@ export class LeaseService {
     this.logger.warn(`Control lease for UAV ${vehicleId} forcibly preempted by commander ${commanderId}`);
   }
 }
+

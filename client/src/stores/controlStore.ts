@@ -16,3 +16,4 @@ export const useControlStore = create<ControlState>((set) => ({
   setLeaseStatus: (hasControlLease, expiresAt) =>
     set({ hasControlLease, leaseExpiresAt: expiresAt || null }),
 }));
+

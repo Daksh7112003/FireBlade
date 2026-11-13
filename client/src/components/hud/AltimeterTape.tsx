@@ -17,3 +17,4 @@ export const AltimeterTape: React.FC<Props> = ({ altitudeMsl, altitudeAgl, climb
     </div>
   );
 };
+

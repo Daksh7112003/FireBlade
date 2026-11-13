@@ -31,3 +31,4 @@ COPY --from=build /app/build/flight-core /app/flight-core
 EXPOSE 14550/udp
 
 CMD ["/app/flight-core"]
+

@@ -9,3 +9,4 @@ export interface Vehicle {
   isActive: boolean;
   createdAt: string;
 }
+

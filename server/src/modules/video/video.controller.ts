@@ -17,3 +17,4 @@ export class VideoController {
     return this.videoService.getStreamForVehicle(vehicleId);
   }
 }
+

@@ -35,3 +35,4 @@ export const rtlVehicle = async (vehicleId: string) => {
   const response = await apiClient.post(`/vehicles/${vehicleId}/rtl`);
   return response.data;
 };
+

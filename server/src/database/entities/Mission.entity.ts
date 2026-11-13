@@ -33,3 +33,4 @@ export class Mission {
   @UpdateDateColumn()
   updatedAt: Date;
 }
+

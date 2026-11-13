@@ -77,3 +77,4 @@ export const WebRtcPlayer: React.FC<Props> = ({ streamPath }) => {
     </div>
   );
 };
+

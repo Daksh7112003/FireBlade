@@ -70,3 +70,4 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
     </div>
   );
 };
+

@@ -17,3 +17,4 @@ export class VehiclesController {
     return this.vehiclesService.findOne(id);
   }
 }
+

@@ -28,3 +28,4 @@ export class AuditLog {
   @Column({ length: 64, nullable: true })
   ipAddress: string;
 }
+

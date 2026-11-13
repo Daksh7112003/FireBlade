@@ -30,3 +30,4 @@ export const useTelemetry = (activeVehicleId: string | null) => {
     };
   }, [activeVehicleId, updateTelemetry]);
 };
+

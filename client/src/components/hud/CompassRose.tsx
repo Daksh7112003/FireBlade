@@ -12,3 +12,4 @@ export const CompassRose: React.FC<Props> = ({ heading }) => {
     </div>
   );
 };
+
