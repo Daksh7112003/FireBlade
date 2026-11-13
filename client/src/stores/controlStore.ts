@@ -10,10 +10,9 @@ interface ControlState {
 
 export const useControlStore = create<ControlState>((set) => ({
   selectedVehicleId: '1', // Default to SysID 1
-  hasControlLease: false,
+  hasControlLease: true,  // Granted by default for single-operator command station
   leaseExpiresAt: null,
-  setSelectedVehicle: (id) => set({ selectedVehicleId: id, hasControlLease: false }),
+  setSelectedVehicle: (id) => set({ selectedVehicleId: id, hasControlLease: true }),
   setLeaseStatus: (hasControlLease, expiresAt) =>
     set({ hasControlLease, leaseExpiresAt: expiresAt || null }),
 }));
-
