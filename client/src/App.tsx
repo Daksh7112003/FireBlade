@@ -12,7 +12,7 @@ import { LayoutDashboard, Compass, Layers, Tv, LogOut, Plane } from 'lucide-reac
 const queryClient = new QueryClient();
 
 const NavigationShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const location = useLocation();
 
   const navItems = [
@@ -120,4 +120,3 @@ export const App: React.FC = () => {
     </QueryClientProvider>
   );
 };
-

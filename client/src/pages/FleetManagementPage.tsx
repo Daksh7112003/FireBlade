@@ -1,5 +1,4 @@
 import React from 'react';
-import { Plane, Settings, RefreshCw } from 'lucide-react';
 
 export const FleetManagementPage: React.FC = () => {
   const mockVehicles = [
@@ -35,4 +34,3 @@ export const FleetManagementPage: React.FC = () => {
     </div>
   );
 };
-

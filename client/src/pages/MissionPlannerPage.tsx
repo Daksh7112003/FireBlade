@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TacticalMap } from '../components/map/TacticalMap';
-import { Upload, Plus, Play, Trash2 } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 export const MissionPlannerPage: React.FC = () => {
-  const [waypoints, setWaypoints] = useState([
+  const waypoints = [
     { seq: 0, lat: 37.7749, lon: -122.4194, alt: 30, cmd: 'TAKEOFF' },
     { seq: 1, lat: 37.7760, lon: -122.4180, alt: 50, cmd: 'WAYPOINT' },
     { seq: 2, lat: 37.7775, lon: -122.4200, alt: 50, cmd: 'WAYPOINT' },
     { seq: 3, lat: 37.7749, lon: -122.4194, alt: 30, cmd: 'RTL' },
-  ]);
+  ];
 
   return (
     <div className="h-full w-full flex bg-tactical-dark">
@@ -42,4 +42,3 @@ export const MissionPlannerPage: React.FC = () => {
     </div>
   );
 };
-

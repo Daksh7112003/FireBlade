@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { PlaneTakeoff, PlaneLanding, Home, Shield, Lock, Unlock } from 'lucide-react';
+import { PlaneTakeoff, Home, Lock, Unlock } from 'lucide-react';
 import { useControlStore } from '../../stores/controlStore';
-import { acquireControlLease, releaseControlLease, armVehicle, takeoffVehicle, rtlVehicle } from '../../api/vehicles.api';
+import { acquireControlLease, releaseControlLease, takeoffVehicle, rtlVehicle } from '../../api/vehicles.api';
 
 export const CommandToolbar: React.FC = () => {
   const { selectedVehicleId, hasControlLease, setLeaseStatus } = useControlStore();
@@ -75,4 +75,3 @@ export const CommandToolbar: React.FC = () => {
     </div>
   );
 };
-

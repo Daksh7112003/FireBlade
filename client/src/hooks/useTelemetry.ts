@@ -1,14 +1,13 @@
-import { useEffect } from 'express';
+import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useTelemetryStore } from '../stores/telemetryStore';
-import { useEffect as useReactEffect } from 'react';
 
 let socket: Socket | null = null;
 
 export const useTelemetry = (activeVehicleId: string | null) => {
   const updateTelemetry = useTelemetryStore((s) => s.updateTelemetry);
 
-  useReactEffect(() => {
+  useEffect(() => {
     if (!socket) {
       socket = io('/telemetry', {
         transports: ['websocket'],
@@ -30,4 +29,3 @@ export const useTelemetry = (activeVehicleId: string | null) => {
     };
   }, [activeVehicleId, updateTelemetry]);
 };
-

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { loginOperator } from '../api/auth.api';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Plane } from 'lucide-react';
+import { Plane } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('admin');
@@ -75,4 +75,3 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
-
