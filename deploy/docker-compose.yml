@@ -1,0 +1,97 @@
+version: '3.8'
+
+networks:
+  fireblade-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: fireblade-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: fireblade
+      POSTGRES_USER: fireblade_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fireblade_secure_pwd_2026}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - fireblade-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: fireblade-redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-fireblade_redis_pwd_2026}
+    volumes:
+      - redisdata:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - fireblade-net
+
+  flight-core:
+    build:
+      context: ../flight-core
+      dockerfile: ../deploy/docker/Dockerfile.flight-core
+    container_name: fireblade-flight-core
+    restart: always
+    network_mode: "host"
+    environment:
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-fireblade_redis_pwd_2026}
+      MAVLINK_LISTEN_PORT: 14550
+
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: fireblade-mediamtx
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
+
+  backend:
+    build:
+      context: ../server
+      dockerfile: ../deploy/docker/Dockerfile.backend
+    container_name: fireblade-backend
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://fireblade_admin:${DB_PASSWORD:-fireblade_secure_pwd_2026}@postgres:5432/fireblade
+      REDIS_URL: redis://:${REDIS_PASSWORD:-fireblade_redis_pwd_2026}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-fireblade_tactical_jwt_secret_key_2026_super_secure}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - fireblade-net
+
+  frontend:
+    build:
+      context: ../client
+      dockerfile: ../deploy/docker/Dockerfile.frontend
+    container_name: fireblade-frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - backend
+    networks:
+      - fireblade-net
+
+volumes:
+  pgdata:
+  redisdata:

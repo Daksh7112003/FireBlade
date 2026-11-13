@@ -1,0 +1,31 @@
+# MediaMTX Configuration for Fireblade GCS
+# Ingests multi-camera RTSP and serves sub-150ms WebRTC (WHEP)
+
+logLevel: info
+logDestinations: [stdout]
+
+# RTSP Ingestion Server
+rtsp: yes
+rtspAddress: :8554
+protocols: [udp, multicast, tcp]
+
+# WebRTC (WHEP) Low Latency Server
+webrtc: yes
+webrtcAddress: :8889
+webrtcEncryption: no
+webrtcServerKey: ""
+webrtcServerCert: ""
+webrtcAllowOrigins: ["*"]
+# Single UDP port multiplexing for reliable firewall traversal
+webrtcLocalUDPAddress: :8555
+webrtcIPsFromInterfaces: yes
+
+# Stream Path Patterns
+paths:
+  # Dynamic UAV stream mapping pattern: e.g. /live/uav_1_cam_1
+  live/~^uav_(?P<vehicleId>[0-9]+)_cam_(?P<camId>[0-9]+)$:
+    source: rtsp://192.168.10.$vehicleId:8554/cam$camId
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 5s
+    sourceOnDemandCloseAfter: 15s
+    maxReaders: 50

@@ -1,0 +1,33 @@
+# Multi-stage Dockerfile for C++ Flight-Core Daemon
+FROM ubuntu:22.04 AS build
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    libhiredis-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY . .
+
+RUN mkdir -p build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    cmake --build . --config Release
+
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    libhiredis0.14 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=build /app/build/flight-core /app/flight-core
+
+EXPOSE 14550/udp
+
+CMD ["/app/flight-core"]
