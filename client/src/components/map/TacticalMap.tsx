@@ -2,13 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import { useTelemetryStore } from '../../stores/telemetryStore';
 import { useMissionStore } from '../../stores/missionStore';
-import { Crosshair } from 'lucide-react';
+import { Crosshair, MapPin } from 'lucide-react';
 
 interface Props {
   selectedVehicleId: string;
+  editable?: boolean;
 }
 
-export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
+export const TacticalMap: React.FC<Props> = ({ selectedVehicleId, editable = false }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const droneMarker = useRef<maplibregl.Marker | null>(null);
@@ -16,7 +17,7 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
   const waypointMarkers = useRef<maplibregl.Marker[]>([]);
   const hasCentered = useRef(false);
 
-  const waypoints = useMissionStore((s) => s.waypoints);
+  const { waypoints, defaultAlt, addWaypoint, updateWaypoint } = useMissionStore();
 
   // Initialize Map
   useEffect(() => {
@@ -46,6 +47,10 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
       center: [-122.4194, 37.7749],
       zoom: 15,
     });
+
+    if (editable) {
+      map.current.getCanvas().style.cursor = 'crosshair';
+    }
 
     // Create high-visibility tactical UAV marker
     const el = document.createElement('div');
@@ -85,9 +90,9 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
       .addTo(map.current);
 
     map.current.on('load', () => {
-      // Add GeoJSON line source for mission flight path
       if (!map.current) return;
 
+      // Add GeoJSON source for flight corridor
       map.current.addSource('mission-path', {
         type: 'geojson',
         data: {
@@ -100,7 +105,7 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
         },
       });
 
-      // Mission path outline
+      // Glow outline
       map.current.addLayer({
         id: 'mission-path-glow',
         type: 'line',
@@ -109,11 +114,11 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
         paint: {
           'line-color': '#06b6d4',
           'line-width': 6,
-          'line-opacity': 0.3,
+          'line-opacity': 0.35,
         },
       });
 
-      // Main dashed waypoint path
+      // Main dashed flight line
       map.current.addLayer({
         id: 'mission-path-line',
         type: 'line',
@@ -127,16 +132,28 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
       });
     });
 
+    // Click on map to add waypoint
+    map.current.on('click', (e) => {
+      if (!editable) return;
+      const { lng, lat } = e.lngLat;
+      addWaypoint({
+        lat: Number(lat.toFixed(6)),
+        lon: Number(lng.toFixed(6)),
+        alt: defaultAlt,
+        cmd: 'WAYPOINT',
+      });
+    });
+
     return () => {
       map.current?.remove();
     };
-  }, [selectedVehicleId]);
+  }, [selectedVehicleId, editable, defaultAlt, addWaypoint]);
 
-  // Update Mission Path & Waypoint Pins
+  // Update Mission Path & Draggable Waypoint Pins
   useEffect(() => {
     if (!map.current) return;
 
-    // 1. Update LineString geometry
+    // 1. Update GeoJSON flight corridor LineString
     const source = map.current.getSource('mission-path') as maplibregl.GeoJSONSource;
     if (source) {
       source.setData({
@@ -149,31 +166,48 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
       });
     }
 
-    // 2. Clear old waypoint markers
+    // 2. Clear previous markers
     waypointMarkers.current.forEach((m) => m.remove());
     waypointMarkers.current = [];
 
-    // 3. Render numbered waypoint pins
-    waypoints.forEach((wp) => {
+    // 3. Re-render numbered pins (draggable if in edit mode)
+    waypoints.forEach((wp, idx) => {
       const pin = document.createElement('div');
-      pin.className =
-        'flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 border-2 border-yellow-400 text-yellow-300 font-mono text-[10px] font-bold shadow-lg';
+      pin.className = `flex items-center justify-center w-7 h-7 rounded-full border-2 font-mono text-[11px] font-bold shadow-xl cursor-grab transition active:cursor-grabbing ${
+        wp.cmd === 'TAKEOFF'
+          ? 'bg-emerald-950 border-emerald-400 text-emerald-300'
+          : wp.cmd === 'RTL'
+          ? 'bg-amber-950 border-amber-400 text-amber-300'
+          : 'bg-slate-900 border-yellow-400 text-yellow-300'
+      }`;
       pin.innerText = `${wp.seq}`;
 
-      const m = new maplibregl.Marker({ element: pin })
+      const m = new maplibregl.Marker({
+        element: pin,
+        draggable: editable,
+      })
         .setLngLat([wp.lon, wp.lat])
         .addTo(map.current!);
 
+      if (editable) {
+        m.on('dragend', () => {
+          const lngLat = m.getLngLat();
+          updateWaypoint(idx, {
+            lat: Number(lngLat.lat.toFixed(6)),
+            lon: Number(lngLat.lng.toFixed(6)),
+          });
+        });
+      }
+
       waypointMarkers.current.push(m);
     });
-  }, [waypoints]);
+  }, [waypoints, editable, updateWaypoint]);
 
   // Telemetry updates (move drone marker & update heading rotation)
   useEffect(() => {
     const unsub = useTelemetryStore.subscribe((state) => {
       const telem = state.vehicles[selectedVehicleId];
       if (telem && telem.latitude && telem.longitude && droneMarker.current) {
-        // Update Marker Coordinates
         droneMarker.current.setLngLat([telem.longitude, telem.latitude]);
 
         // Auto-center map on first valid position
@@ -182,7 +216,7 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
           hasCentered.current = true;
         }
 
-        // Update Aircraft Heading Rotation
+        // Rotate drone body
         if (droneElement.current) {
           const rotorBody = droneElement.current.querySelector('#uav-rotor-body') as HTMLElement;
           if (rotorBody) {
@@ -199,7 +233,6 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
     return () => unsub();
   }, [selectedVehicleId]);
 
-  // Center UAV manually
   const centerOnUav = () => {
     const telem = useTelemetryStore.getState().vehicles[selectedVehicleId];
     if (telem && map.current && telem.latitude && telem.longitude) {
@@ -210,6 +243,14 @@ export const TacticalMap: React.FC<Props> = ({ selectedVehicleId }) => {
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
+
+      {/* Interactive Helper Banner when editing mission */}
+      {editable && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center space-x-2 bg-slate-950/90 border border-cyan-500/50 backdrop-blur px-3 py-1.5 rounded-full shadow-2xl text-xs font-mono text-cyan-300 pointer-events-none select-none">
+          <MapPin className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+          <span>Click anywhere on map to drop waypoint &bull; Drag pins to move</span>
+        </div>
+      )}
 
       {/* Center Drone Button */}
       <button
