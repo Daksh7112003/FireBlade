@@ -119,3 +119,4 @@ To maintain architectural stability and prevent runtime deadlocks:
 1. **Unidirectional Hierarchy:** Layered dependencies strictly follow `Client -> Ingress -> Backend Core -> Broker -> Flight Core`. Reverse imports are strictly prohibited.
 2. **DTO Isolation:** Data Transfer Objects (DTOs) and TypeScript interfaces are isolated in dedicated `types/` directories and never import active services or controllers.
 3. **Automated Lint Checks:** ESLint with `import/no-cycle` is configured in CI to reject any circular dependency across modules.
+

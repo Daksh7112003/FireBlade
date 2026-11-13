@@ -146,3 +146,4 @@ gantt
 | **Phase 2** | **Single-UAV Telemetry & Video** | NestJS WebSocket gateway, MediaMTX WHEP server, React Canvas PFD HUD, MapLibre tactical map. | Sub-150ms video latency and 60 FPS HUD rendering for 1 active UAV. |
 | **Phase 3** | **Multi-UAV & Collaborative Control** | Distributed Control Lease manager, multi-UAV routing table, mission upload protocol, RBAC. | 8 concurrent UAVs controlled by 4 distinct browser operators with zero command crosstalk. |
 | **Phase 4** | **Hardening & Field Deployment** | Docker Compose orchestration, dual-NIC network configuration, SITL regression tests. | 48-hour continuous soak test with simulated packet drop without failure. |
+

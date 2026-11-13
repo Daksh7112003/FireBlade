@@ -185,3 +185,4 @@ Writing high-frequency telemetry (30-50Hz across 32 UAVs = up to 1600 rows per s
 2. Packets are placed into a high-capacity in-memory array (`telemetryBatchQueue`).
 3. A background timer running every **1000ms** drains the queue and executes a single multi-row parameterized `INSERT INTO telemetry_logs (...) VALUES (...)` statement into TimescaleDB.
 4. Downsampling policies automatically retain full 10Hz data for 7 days, 1Hz data for 30 days, and 0.1Hz data indefinitely for historical compliance.
+

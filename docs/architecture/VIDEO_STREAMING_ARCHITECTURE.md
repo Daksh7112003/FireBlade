@@ -143,3 +143,4 @@ The operator UI provides an instant toggle:
 - **Zero-Latency Jitter Buffer:** In standard WebRTC, browsers buffer 100-300ms of frames to smooth jitter. Fireblade's player applies `playoutDelayHint = 0` and `jitterBufferTarget = 0` via the WebRTC statistics API to enforce minimum latency.
 - **Blank Frame Injection:** If the airborne camera drops Wi-Fi packets, MediaMTX holds the last decoded frame for 500ms before displaying a standardized "VIDEO SIGNAL LOST" overlay, preventing player crash.
 - **Auto-Reconnect:** If the WebSockets or ICE connection state transitions to `disconnected` or `failed`, the frontend player automatically attempts renegotiation every 2000ms.
+

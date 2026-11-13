@@ -184,3 +184,4 @@ For manual or assisted manual piloting, the client interfaces directly with the 
   - Axis 2 (Throttle): 0 to 1000
   - Axis 3 (Yaw): -1000 to +1000
 - **Safety Interlock:** Gamepad inputs are only transmitted to the backend if the operator holds an active, verified **Control Lease** for that vehicle. If the browser tab loses focus, stick commands immediately zero out to prevent runaway conditions.
+

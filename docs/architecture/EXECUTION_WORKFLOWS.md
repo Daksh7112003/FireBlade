@@ -224,3 +224,4 @@ sequenceDiagram
 1. If the NestJS process crashes, Docker automatically restarts the container (`restart: unless-stopped`).
 2. Because Redis maintains active lease state in memory, control leases persist across backend restarts without disruption.
 3. Operators' browser WebSocket connections reconnect with exponential backoff and resume telemetry display instantly.
+

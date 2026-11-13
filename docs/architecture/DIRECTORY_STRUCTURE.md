@@ -238,3 +238,4 @@ flowchart TD
 1. **Client Never Talks Directly to Flight-Core:** The web client has no direct socket connection to the physical MAVLink UDP port (14550). All commands pass through NestJS for authentication, authorization, and control-lease verification.
 2. **Flight-Core Has No Database Access:** The flight communication daemon is kept lean and stateless. It does not perform SQL queries or disk I/O; it forwards raw or parsed telemetry packets directly into Redis memory buffers.
 3. **Video Data Bypasses Application Logic:** High-bitrate video streams (H.264/H.265 at 4-15 Mbps) bypass Node.js entirely. MediaMTX ingests the RTSP streams from the radios and serves WebRTC WHEP sessions directly to browsers, ensuring the Node.js event loop remains dedicated to flight state and telemetry.
+

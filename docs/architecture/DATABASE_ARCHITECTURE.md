@@ -195,3 +195,4 @@ SELECT add_compression_policy('telemetry_logs', INTERVAL '2 days');
 -- Retention Policy: Drop raw 50Hz data older than 30 days
 SELECT add_retention_policy('telemetry_logs', INTERVAL '30 days');
 ```
+

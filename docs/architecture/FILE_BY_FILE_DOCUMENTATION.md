@@ -322,3 +322,4 @@ This document details the complete source code architecture for Fireblade GCS. A
 - **Module:** High-Speed Telemetry Bus Interop
 - **File Type:** C++ Source (`.cpp`)
 - **Purpose:** Serializes unpacked MAVLink telemetry structs and publishes them to Redis channel `telemetry:broadcast` using `hiredis` async client.
+

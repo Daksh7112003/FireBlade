@@ -173,3 +173,4 @@ sequenceDiagram
 1. **Coordinate Frame:** Always use `MAV_FRAME_GLOBAL_RELATIVE_ALT_INT` (WGS84 lat/lon scaled by 1e7, altitude in millimeters above ground takeoff elevation).
 2. **Terrain Clearance:** Waypoints are validated against a Digital Elevation Model (DEM) before transmission to prevent CFIT (Controlled Flight Into Terrain).
 3. **Emergency Rally Points:** Every mission plan includes pre-computed emergency rally points and automatic geofence inclusion polygons.
+

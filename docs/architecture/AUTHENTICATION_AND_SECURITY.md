@@ -95,3 +95,4 @@ flowchart LR
 - **Port Minimization:** Only port 80/443 (HTTP/HTTPS), 8554 (RTSP), 8555 (WebRTC UDP), and 14550 (MAVLink UDP) are accessible through the firewall. All database (Postgres 5432) and cache (Redis 6379) ports are strictly bound to `127.0.0.1` and inaccessible from the LAN.
 - **Cross-Origin Isolation:** Nginx sets `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` to protect shared array buffers.
 - **Tamper-Evident Audit Trails:** Every flight-critical command is written with an atomic transaction to `audit_logs` including operator UUID, workstation IP, exact parameter payload, and timestamp.
+
