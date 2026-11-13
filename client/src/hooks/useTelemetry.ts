@@ -1,31 +1,35 @@
 import { useEffect } from 'react';
-import { io, Socket } from 'socket.io-client';
 import { useTelemetryStore } from '../stores/telemetryStore';
-
-let socket: Socket | null = null;
 
 export const useTelemetry = (activeVehicleId: string | null) => {
   const updateTelemetry = useTelemetryStore((s) => s.updateTelemetry);
 
   useEffect(() => {
-    if (!socket) {
-      socket = io('/telemetry', {
-        transports: ['websocket'],
-      });
+    // 1. Connect via native EventSource to local telemetry bridge
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource('http://127.0.0.1:3001/stream');
 
-      socket.on('vehicle:telemetry:update', (data) => {
-        updateTelemetry(data.sysId?.toString() || '1', data);
-      });
-    }
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data && data.sysId) {
+            updateTelemetry(data.sysId.toString(), data);
+          }
+        } catch {
+          // Ignore JSON parse errors
+        }
+      };
 
-    if (activeVehicleId && socket) {
-      socket.emit('subscribe:vehicle', { vehicleId: activeVehicleId });
+      es.onerror = () => {
+        // EventSource will automatically reconnect
+      };
+    } catch {
+      // Fallback
     }
 
     return () => {
-      if (activeVehicleId && socket) {
-        socket.emit('unsubscribe:vehicle', { vehicleId: activeVehicleId });
-      }
+      es?.close();
     };
   }, [activeVehicleId, updateTelemetry]);
 };
